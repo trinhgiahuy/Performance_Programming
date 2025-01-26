@@ -10,48 +10,85 @@ impl Packages {
     /// chooses the first option A. Returns a Vec<i32> of package numbers.
     ///
     /// Note: does not consider which packages are installed.
+    // pub fn transitive_dep_solution(&self, package_name: &str) -> Vec<i32> {
+    //     if !self.package_exists(package_name) {
+    //         return vec![];
+    //     }
+
+    //     let deps: &Vec<Dependency> = &*self
+    //         .dependencies
+    //         .get(self.get_package_num(package_name))
+    //         .unwrap();
+    //     let mut dependency_set = vec![];
+        
+    //     // ? Iterate the first alternative given assuming it is installable
+    //     for dep in deps {
+    //         if let Some(item) = dep.first() {
+    //             dependency_set.push(item.package_num);
+    //         }
+    //     }
+
+    //     let mut new_dependencies_added = true;
+
+    //     while new_dependencies_added {
+    //         new_dependencies_added = false;
+
+    //         let current_dependencies = dependency_set.clone();
+
+    //         for pkg_num in current_dependencies {
+    //             if let Some(deps) = self.dependencies.get(&pkg_num) {
+    //                 for dep in deps {
+    //                     if let Some(item) = dep.first() {
+    //                         if !dependency_set.contains(&item.package_num) {
+    //                             dependency_set.push(item.package_num);
+    //                             new_dependencies_added = true;
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     return dependency_set;
+    // }
     pub fn transitive_dep_solution(&self, package_name: &str) -> Vec<i32> {
         if !self.package_exists(package_name) {
             return vec![];
         }
-
-        let deps: &Vec<Dependency> = &*self
-            .dependencies
-            .get(self.get_package_num(package_name))
-            .unwrap();
-        let mut dependency_set = vec![];
-        
-        // ? Iterate the first alternative given assuming it is installable
-        for dep in deps {
-            if let Some(item) = dep.first() {
-                dependency_set.push(item.package_num);
+    
+        let mut dependency_set = vec![]; // Use Vec to maintain order
+        let mut worklist = VecDeque::new();
+    
+        // Get initial dependencies and populate the worklist
+        if let Some(deps) = self.dependencies.get(&self.get_package_num(package_name)) {
+            for dep in deps {
+                if let Some(item) = dep.first() {
+                    if !dependency_set.contains(&item.package_num) {
+                        dependency_set.push(item.package_num);
+                        worklist.push_back(item.package_num);
+                    }
+                }
             }
         }
-
-        let mut new_dependencies_added = true;
-
-        while new_dependencies_added {
-            new_dependencies_added = false;
-
-            let current_dependencies = dependency_set.clone();
-
-            for pkg_num in current_dependencies {
-                if let Some(deps) = self.dependencies.get(&pkg_num) {
-                    for dep in deps {
-                        if let Some(item) = dep.first() {
-                            if !dependency_set.contains(&item.package_num) {
-                                dependency_set.push(item.package_num);
-                                new_dependencies_added = true;
-                            }
+    
+        // Process the dependencies in the worklist
+        while let Some(pkg_num) = worklist.pop_front() {
+            if let Some(deps) = self.dependencies.get(&pkg_num) {
+                for dep in deps {
+                    if let Some(item) = dep.first() {
+                        // Add only if not already present
+                        if !dependency_set.contains(&item.package_num) {
+                            dependency_set.push(item.package_num);
+                            worklist.push_back(item.package_num);
                         }
                     }
                 }
             }
         }
-
-        return dependency_set;
+    
+        dependency_set
     }
-
+      
     /// Computes a set of packages that need to be installed to satisfy package_name's deps given the current installed packages.
     /// When a dependency A | B | C is unsatisfied, there are two possible cases:
     ///   (1) there are no versions of A, B, or C installed; pick the alternative with the highest version number (yes, compare apples and oranges).

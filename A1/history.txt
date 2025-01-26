@@ -1,0 +1,31 @@
+#V2
+ld
+info bash
+da
+deps-available 4g8
+deps-available 
+ld
+deps-available 4g8
+how-to-install 4g8
+transitive-dep-solution 4g8
+transitive-dep-solution libzydis-dev
+transitive-dep-solution 4g8
+transitive-dep-solution libzydis-dev
+ld
+transitive-dep-solution libzydis-dev
+deps-available libzydis-dev
+how-to-install libzydis-dev
+load-csv data/packages.csv
+enq-verify bash
+enq-verify 0ad
+enq-verify libc6 28
+quit
+ld
+info libc6
+deps-available 0ad
+deps-available libcubeb0
+deps-available sensible-utils
+transitive-dep-solution libzydis-dev
+ld
+deps-available 0ad
+transitive-dep-solution libzydis-dev
